@@ -45,8 +45,8 @@ void calcDepth(float *depth,
         *floatOps = 0;
     }
     
-    for (int y = 0; y < imageHeight; y++) {
-        for (int x = 0; x < imageWidth - (imageWidth % 4); x++) {
+    for (int x = 0; x < imageWidth; x++) {
+        for (int y = 0; y < imageHeight; y++) {
             if ((y < featureHeight) ||
                 (y >= imageHeight - featureHeight) ||
                 (x < featureWidth) ||
