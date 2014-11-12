@@ -1,0 +1,20 @@
+Makefile
+	benchmark
+	benchmark.c
+	benchmark.o
+	calcDepthNaive.c
+	calcDepthNaive.h
+	calcDepthNaive.o
+	calcDepthOptimized.h
+	calcDepthOptimized.o
+	check
+	check.c
+	check.o
+	depthMap
+	depthMap.c
+	depthMap.o
+	qsubScript.sh
+	test/
+	utils.c
+	utils.h
+	utils.o
