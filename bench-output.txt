@@ -1,0 +1,6 @@
+Testing 100x100 image, 4x4 feature, 6 maximum diplacement... 8.0068 Gflop/s
+Testing 200x200 image, 4x4 feature, 6 maximum diplacement... 8.9487 Gflop/s
+Testing 300x300 image, 4x4 feature, 6 maximum diplacement... 8.9678 Gflop/s
+Testing 400x400 image, 4x4 feature, 6 maximum diplacement... 8.9744 Gflop/s
+Testing 500x500 image, 4x4 feature, 6 maximum diplacement... 8.9806 Gflop/s
+Testing 200x400 image, 3x3 feature, 7 maximum diplacement... 3.0066 Gflop/s

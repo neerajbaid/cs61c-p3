@@ -1,20 +1,27 @@
-Makefile
-benchmark
-benchmark.c
-benchmark.o
-calcDepthNaive.c
-calcDepthNaive.h
-calcDepthNaive.o
-calcDepthOptimized.h
-calcDepthOptimized.o
-check
-check.c
-check.o
-depthMap
-depthMap.c
-depthMap.o
-qsubScript.sh
-test/*
-utils.c
-utils.h
-utils.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex

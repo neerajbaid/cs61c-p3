@@ -11,6 +11,7 @@
 #include "calcDepthNaive.h"
 
 #define ABS(x) (((x) < 0) ? (-(x)) : (x))
+#define BLOCKSIZE 128
 
 // unrolling the inside x loop is known to increase by 0.5 Gflop/s
 
@@ -33,64 +34,68 @@ void calcDepth(float *depth,
         *floatOps = 0;
     }
     
-    for (int x = 0; x < imageWidth; x++) {
-        for (int y = 0; y < imageHeight; y++) {
-            if ((y < featureHeight) ||
-                (y >= imageHeight - featureHeight) ||
-                (x < featureWidth) ||
-                (x >= imageWidth - featureWidth)) {
-                depth[y * imageWidth + x] = 0;
-            } else {
-                float minimumSquaredDifference = -1;
-                int minimumDy = 0;
-                int minimumDx = 0;
-                
-                for (int dy = -maximumDisplacement; dy <= maximumDisplacement; dy++) {
-                    for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++) {
-                        if (y + dy - featureHeight < 0 ||
-                            y + dy + featureHeight >= imageHeight ||
-                            x + dx - featureWidth < 0 ||
-                            x + dx + featureWidth >= imageWidth) {
-                            continue;
-                        }
+    for (int b_y = 0; b_y < imageHeight; b_y += BLOCKSIZE) {
+        for (int b_x = 0; b_x < imageWidth; b_x += BLOCKSIZE) {
+            for (int y = b_y; y < b_y + BLOCKSIZE && y < imageHeight; y++) {
+                for (int x = b_x; x < b_x + BLOCKSIZE && x < imageWidth; x++) {
+                    if ((y < featureHeight) ||
+                        (y >= imageHeight - featureHeight) ||
+                        (x < featureWidth) ||
+                        (x >= imageWidth - featureWidth)) {
+                        depth[y * imageWidth + x] = 0;
+                    } else {
+                        float minimumSquaredDifference = -1;
+                        int minimumDy = 0;
+                        int minimumDx = 0;
                         
-                        float squaredDifference = 0;
-                        
-                        for (int boxY = -featureHeight; boxY <= featureHeight; boxY++) {
-                            for (int boxX = -featureWidth; boxX <= featureWidth; boxX ++) {
-                                int leftX = x + boxX;
-                                int leftY = y + boxY;
-                                int rightX = leftX + dx;
-                                int rightY = leftY + dy;
+                        for (int dy = -maximumDisplacement; dy <= maximumDisplacement; dy++) {
+                            for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++) {
+                                if (y + dy - featureHeight < 0 ||
+                                    y + dy + featureHeight >= imageHeight ||
+                                    x + dx - featureWidth < 0 ||
+                                    x + dx + featureWidth >= imageWidth) {
+                                    continue;
+                                }
                                 
-                                float difference = left[leftY * imageWidth + leftX] - right[rightY * imageWidth + rightX];
-                                squaredDifference += difference * difference;
+                                float squaredDifference = 0;
                                 
-                                if (floatOps != NULL) {
-                                    *floatOps += 3;
+                                for (int boxY = -featureHeight; boxY <= featureHeight; boxY++) {
+                                    for (int boxX = -featureWidth; boxX <= featureWidth; boxX ++) {
+                                        int leftX = x + boxX;
+                                        int leftY = y + boxY;
+                                        int rightX = leftX + dx;
+                                        int rightY = leftY + dy;
+                                        
+                                        float difference = left[leftY * imageWidth + leftX] - right[rightY * imageWidth + rightX];
+                                        squaredDifference += difference * difference;
+                                        
+                                        if (floatOps != NULL) {
+                                            *floatOps += 3;
+                                        }
+                                    }
+                                }
+                                
+                                if ((minimumSquaredDifference == -1) ||
+                                    ((minimumSquaredDifference == squaredDifference) &&
+                                     (displacement(dx, dy) < displacement(minimumDx, minimumDy))) ||
+                                    (minimumSquaredDifference > squaredDifference)) {
+                                    minimumSquaredDifference = squaredDifference;
+                                    minimumDx = dx;
+                                    minimumDy = dy;
                                 }
                             }
                         }
                         
-                        if ((minimumSquaredDifference == -1) ||
-                            ((minimumSquaredDifference == squaredDifference) &&
-                             (displacement(dx, dy) < displacement(minimumDx, minimumDy))) ||
-                            (minimumSquaredDifference > squaredDifference)) {
-                            minimumSquaredDifference = squaredDifference;
-                            minimumDx = dx;
-                            minimumDy = dy;
+                        if (minimumSquaredDifference != -1) {
+                            if (maximumDisplacement == 0) {
+                                depth[y * imageWidth + x] = 0;
+                            } else {
+                                depth[y * imageWidth + x] = displacement(minimumDx, minimumDy);
+                            }
+                        } else {
+                            depth[y * imageWidth + x] = 0;
                         }
                     }
-                }
-                
-                if (minimumSquaredDifference != -1) {
-                    if (maximumDisplacement == 0) {
-                        depth[y * imageWidth + x] = 0;
-                    } else {
-                        depth[y * imageWidth + x] = displacement(minimumDx, minimumDy);
-                    }
-                } else {
-                    depth[y * imageWidth + x] = 0;
                 }
             }
         }
